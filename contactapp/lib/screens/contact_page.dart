@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_app/models/contact.dart';
@@ -12,11 +11,7 @@ class ContactPage extends StatelessWidget {
         title: Text('Contacts'),
       ),
       body: Column(
-        children: <Widget>[
-          Expanded(child: _buildListView()),
-          NewContactForm()
-
-        ],
+        children: <Widget>[Expanded(child: _buildListView()), NewContactForm()],
       ),
     );
   }
@@ -24,11 +19,11 @@ class ContactPage extends StatelessWidget {
   Widget _buildListView() {
     // ignore: deprecated_member_use
     return WatchBoxBuilder(
-      box:  Hive.box('contacts'),
-      builder: (context,contactBox){
+      box: Hive.box('contacts'),
+      builder: (context, contactBox) {
         return ListView.builder(
             itemCount: contactBox.length,
-            itemBuilder: (context,index){
+            itemBuilder: (context, index) {
               final contact = contactBox.getAt(index) as Contact;
               return ListTile(
                 title: Text(contact.name),
@@ -36,12 +31,22 @@ class ContactPage extends StatelessWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    IconButton(icon: Icon(Icons.refresh), onPressed: (){
-                      contactBox.putAt(index, Contact('${contact.name}', contact.age+1));
-                    }),
-                    IconButton(icon: Icon(Icons.delete), onPressed: (){
-                      contactBox.deleteAt(index);
-                    })
+                    IconButton(
+                        icon: Icon(Icons.refresh),
+                        onPressed: null // you need perform update operation here
+//                            () {
+//                          contactBox.putAt(
+//                              index,
+//                              Contact(
+//                                  '${contact.name.substring(0, contact.name.length - 1)}',
+//                                  contact.age + 1));
+//                        },
+                    ),
+                    IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          contactBox.deleteAt(index);
+                        })
                   ],
                 ),
               );
@@ -67,7 +72,7 @@ class _NewContactFormState extends State<NewContactForm> {
 
   String _age;
 
-  void addContact(Contact newContact){
+  void addContact(Contact newContact) {
     //print('name : ${newContact.name}  age: ${newContact.age}');
     final contactBox = Hive.box('contacts');
     contactBox.add(newContact);
@@ -80,16 +85,17 @@ class _NewContactFormState extends State<NewContactForm> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: TextFormField(
                       keyboardType: TextInputType.text,
                       controller: nameController,
-                      onSaved: (value)=> _name = value,
+                      onSaved: (value) => _name = value,
                       validator: (value) =>
-                      value.isEmpty ? 'user name required' : null,
+                          value.isEmpty ? 'user name required' : null,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 16.0,
@@ -100,8 +106,7 @@ class _NewContactFormState extends State<NewContactForm> {
                           errorStyle: TextStyle(
                             color: Colors.deepOrange,
                             fontSize: 16.0,
-                          )
-                      ),
+                          )),
                     ),
                   ),
                   SizedBox(
@@ -112,20 +117,25 @@ class _NewContactFormState extends State<NewContactForm> {
                       keyboardType: TextInputType.number,
                       controller: ageController,
                       onSaved: (value) => _age = value,
-                      validator: (value) =>
-                      value.isEmpty? 'Age is required' : null,
+                      validator: (value) => value.isEmpty
+                          ? 'Mobile Number\nis required'
+                          : (value.length < 10 && value.length != 10)
+                              ? 'Number should have\n10 character'
+                              : (value.length > 10 && value.length < 12) ||
+                                      value.length > 12
+                                  ? 'Number should have\n12 or 10 characters'
+                                  : null,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 16.0,
                         fontWeight: FontWeight.w500,
                       ),
                       decoration: InputDecoration(
-                          labelText: 'Enter Age',
+                          labelText: 'Enter Mobile number',
                           errorStyle: TextStyle(
                             color: Colors.deepOrange,
                             fontSize: 16.0,
-                          )
-                      ),
+                          )),
                     ),
                   ),
                 ],
@@ -136,19 +146,21 @@ class _NewContactFormState extends State<NewContactForm> {
               child: MaterialButton(
                 color: Colors.purpleAccent,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.0)
-                ),
+                    borderRadius: BorderRadius.circular(14.0)),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0,horizontal: 4.0),
-                  child: Text('Save contact', style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0
-                  ),),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 4.0),
+                  child: Text(
+                    'Save contact',
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0),
+                  ),
                 ),
-                onPressed: (){
+                onPressed: () {
                   final form = _formKey.currentState;
-                  if(form.validate()){
+                  if (form.validate()) {
                     form.save();
                     final newContact = Contact(_name, int.parse(_age));
                     nameController.clear();
